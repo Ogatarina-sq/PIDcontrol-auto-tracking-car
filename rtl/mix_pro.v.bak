@@ -1,0 +1,86 @@
+module mix_pro(
+	input              CLK,
+	input              RST,
+	//-----------------------------------
+	input      [15: 0] ADCDATA,
+	input      [15: 0] ADCDATB,
+	//--------------------------------
+	output reg [15: 0] MIX1_DATI,
+	output reg [15: 0] MIX1_DATQ
+	output reg [15: 0] MIX2_DATI,
+	output reg [15: 0] MIX2_DATQ
+);
+
+wire [15: 0] NcoDatI;
+wire [15: 0] NcoDatQ;
+
+wire [31: 0] MixDatI1;
+wire [31: 0] MixDatQ1;
+wire [31: 0] MixDatI2;
+wire [31: 0] MixDatQ2;
+
+mix_nco inst_mix_nco(
+	.clk            ( CLK     ),
+	.clken          ( 1'b1    ),
+	.reset_n        ( !RST    ),
+	//----------------------------
+	.clken          ( 1'b1    ),
+	.phi_inc_i      ( 32'h4CCC_CCCD ),
+	//----------------------------
+	.fsin_o         ( NcoDatQ ),
+	.fcos_o         ( NcoDatI ),
+	.out_valid      ( )
+);
+
+mix_mult inst_mix_mult_1i(
+	.clock          ( CLK      ),
+	.aclr           ( RST      ),
+	//--------------------------
+	.dataa          ( ADCDATA  ),
+	.datab          ( NcoDatI  ),
+	.result         ( MixDatI1 )
+);
+
+mix_mult inst_mix_mult_1q(
+	.clock          ( CLK      ),
+	.aclr           ( RST      ),
+	//--------------------------
+	.dataa          ( ADCDATA  ),
+	.datab          ( NcoDatQ  ),
+	.result         ( MixDatQ1 )
+);
+
+mix_mult inst_mix_mult_2i(
+	.clock          ( CLK      ),
+	.aclr           ( RST      ),
+	//--------------------------
+	.dataa          ( ADCDATB  ),
+	.datab          ( NcoDatI  ),
+	.result         ( MixDatI2 )
+);
+
+mix_mult inst_mix_mult_2q(
+	.clock          ( CLK      ),
+	.aclr           ( RST      ),
+	//--------------------------
+	.dataa          ( ADCDATB  ),
+	.datab          ( NcoDatQ  ),
+	.result         ( MixDatQ2 )
+);
+
+always@(posedge CLK,posedge RST)begin
+	if(RST)begin
+		MIX1_DATI      <= 16'd0;
+		MIX1_DATQ      <= 16'd0;
+		MIX2_DATI      <= 16'd0;
+		MIX2_DATQ      <= 16'd0;
+	end else begin
+		MIX1_DATI      <= MixDatI1[31:16] + MixDatI1[15];
+		MIX1_DATQ      <= MixDatQ1[31:16] + MixDatQ1[15];
+		MIX2_DATI      <= MixDatI2[31:16] + MixDatI2[15];
+		MIX2_DATQ      <= MixDatQ2[31:16] + MixDatQ2[15];
+	end
+end
+
+
+endmodule

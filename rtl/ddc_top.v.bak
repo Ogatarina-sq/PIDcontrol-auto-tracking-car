@@ -1,0 +1,70 @@
+module ddc_top(
+	input              CLK,
+	input              RST,
+	input              DDCRST,
+	//--------------------------------
+	input      [15: 0] ADCDATA,
+	input      [15: 0] ADCDATB,
+	//--------------------------------
+	output             DDC1_DOE,
+	output     [15: 0] DDC1_DATI,
+	output     [15: 0] DDC1_DATQ,
+	output             DDC2_DOE,
+	output     [15: 0] DDC2_DATI,
+	output     [15: 0] DDC2_DATQ
+);
+
+wire         GRST;
+
+wire [15: 0] MixDatI1;
+wire [15: 0] MixDatQ1;
+wire [15: 0] MixDatI2;
+wire [15: 0] MixDatQ2;
+
+
+assign GRST       = RST | (!DDCRST);
+
+mix_pro inst_mix_pro(
+	.CLK            ( CLK      ),
+	.RST            ( GRST     ),
+	//-------------------------------
+	.ADCDATA        ( ADCDATA  ),
+	.ADCDATB        ( ADCDATB  ),
+	//-------------------------------
+	.MIX1_DATI      ( MixDatI1 ),
+	.MIX1_DATQ      ( MixDatQ1 )
+	.MIX2_DATI      ( MixDatI2 ),
+	.MIX2_DATQ      ( MixDatQ2 )
+);
+
+prj_por inst_prj_por1(
+	.CLK            ( CLK       ),
+	.RST            ( GRST      ),
+	//-------------------------------
+	.MIX_DATI       ( MixDatI1  ),
+	.MIX_DATQ       ( MixDatQ1  ),
+	//-------------------------------
+	.DDC_DOE        ( DDC1_DOE  ),
+	.DDC_DATI       ( DDC1_DATI ),
+	.DDC_DATQ       ( DDC1_DATQ )
+);
+
+prj_por inst_prj_por2(
+	.CLK            ( CLK       ),
+	.RST            ( GRST      ),
+	//-------------------------------
+	.MIX_DATI       ( MixDatI2  ),
+	.MIX_DATQ       ( MixDatQ2  ),
+	//-------------------------------
+	.DDC_DOE        ( DDC2_DOE  ),
+	.DDC_DATI       ( DDC2_DATI ),
+	.DDC_DATQ       ( DDC2_DATQ )
+);
+
+
+
+
+
+
+
+endmodule

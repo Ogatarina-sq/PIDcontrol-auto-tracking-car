@@ -1,0 +1,1 @@
+create_clock -name CLKG -period 10.000 [get_nets {inst_syspll|syspll_inst|altera_pll_i|outclk_wire[0]}]

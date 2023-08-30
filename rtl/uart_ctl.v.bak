@@ -1,0 +1,26 @@
+module uart_ctl(
+	input              CLK,
+	input              RST,
+	//----------------------------------------
+	input              DIFF_PHEN,
+	input      [15: 0] DIFF_PHDAT,
+	input      [15: 0] ADC_DATA,
+	//----------------------------------------
+	output             ARM_TXD,
+	input              ARM_RXD,
+	output             SIM_TXD,
+	input              SIM_RXD
+);
+
+
+
+
+
+
+
+
+
+
+
+
+endmodule

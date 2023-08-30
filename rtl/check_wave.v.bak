@@ -1,0 +1,52 @@
+module check_wave(
+	input              CLK,
+	input              RST,
+	//-------------------------------
+	input              DDC_DEN,
+	input      [15: 0] DDC_DATI,
+	input      [15: 0] DDC_DATQ,
+	//-------------------------------
+	output reg         CHECK_DOE,
+	output reg [15: 0] CHECK_DAT
+);
+
+wire [31: 0] MultDatI;
+wire [31: 0] MultDatQ;
+reg  [31: 0] AddData;
+
+
+mult2_16 inst_mult2_16i(
+	.clock       ( CLK      ),
+	.aclr        ( RST      ),
+	.dataa       ( DDC_DATI ),
+	.datab       ( DDC_DATI ),
+	.result      ( MultDatI )
+);
+
+mult2_16 inst_mult2_16q(
+	.clock       ( CLK      ),
+	.aclr        ( RST      ),
+	.dataa       ( DDC_DATQ ),
+	.datab       ( DDC_DATQ ),
+	.result      ( MultDatQ )
+);
+
+always@(posedge CLK,posedge RST)begin
+	if(RST)begin
+		AddData       <= 32'd0;
+	end else begin
+		AddData       <= MultDatI + MultDatQ;
+	end
+end
+
+sqrt_alt_sqrt_block_rcb inst_sqrt( 
+	aclr,
+	clken,
+	clock,
+	rad,
+	root_result
+) ;
+
+
+
+endmodule

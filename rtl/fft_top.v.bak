@@ -1,0 +1,80 @@
+module fft_top(
+	input              CLK,
+	input              RST,
+	//----------------------------------
+	input              DDC1_DEN,
+	input      [15: 0] DDC1_DATI,
+	input      [15: 0] DDC1_DATQ,
+	input              DDC2_DEN,
+	input      [15: 0] DDC2_DATI,
+	input      [15: 0] DDC2_DATQ,
+	//----------------------------------
+	output             LOG1DOE,
+	output     [15: 0] LOG1DATA,
+	output             FFT1DOE,
+	output     [15: 0] FFT1DATI,
+	output     [15: 0] FFT1DATQ,
+	output             LOG2DOE,
+	output     [15: 0] LOG2DATA,
+	output             FFT2DOE,
+	output     [15: 0] FFT2DATI,
+	output     [15: 0] FFT2DATQ,
+);
+
+wire         FftBusy1;
+wire         FftBusy2;
+
+wire         DdcDoe1;
+wire [15: 0] DdcDatI1;
+wire [15: 0] DdcDatQ1;
+
+wire         DdcDoe2;
+wire [15: 0] DdcDatI2;
+wire [15: 0] DdcDatQ2;
+
+fft_data inst_fft_data1(
+	.CLK              ( CLK       ),
+	.RST              ( RST       ),
+	.FFTEN            ( 1'b1      ),
+	//-----------------------------------
+	.DDCDEN           ( DDC1_DEN  ),
+	.DDCDATI          ( DDC1_DATI ),
+	.DDCDATQ          ( DDC1_DATQ ),
+	//-----------------------------------
+	.FFTBUSY          ( FftBusy1  ),
+	.FFTDOE           ( DdcDoe1   ),
+	.FFTDATI          ( DdcDatI1  ),
+	.FFTDATQ          ( DdcDatQ1  )
+);
+
+fft_data inst_fft_data2(
+	.CLK              ( CLK       ),
+	.RST              ( RST       ),
+	.FFTEN            ( 1'b1      ),
+	//-----------------------------------
+	.DDCDEN           ( DDC2_DEN  ),
+	.DDCDATI          ( DDC2_DATI ),
+	.DDCDATQ          ( DDC2_DATQ ),
+	//-----------------------------------
+	.FFTBUSY          ( FftBusy2  ),
+	.FFTDOE           ( DdcDoe2   ),
+	.FFTDATI          ( DdcDatI2  ),
+	.FFTDATQ          ( DdcDatQ2  )
+);
+
+fft_pro inst_fft_pro(
+	.CLK              ( CLK       ),
+	.RST              ( RST       ),
+	//-------------------------------------
+	.FFTBUSY          ( ),
+	.FFTDOE           ( DdcDoe2   ),
+	.FFTDATI          ( DdcDatI2  ),
+	.FFTDATQ          ( DdcDatQ2  ),
+	//-------------------------------------
+	
+);
+
+
+
+
+endmodule

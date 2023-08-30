@@ -1,0 +1,59 @@
+module top(
+	input              CLK
+	//----------------------------
+	input      [15: 0] ADCDATA,
+	input      [15: 0] ADCDATB
+);
+
+wire         RST;
+wire         CLKG;
+wire         LocKed;
+
+wire         DdcDOe1;
+wire [15: 0] DdcDatI1;
+wire [15: 0] DdcDatQ1;
+
+wire         DdcDOe2;
+wire [15: 0] DdcDatI2;
+wire [15: 0] DdcDatQ2;
+
+assign RST        = !LocKed;
+
+syspll inst_syspll(
+	.refclk       ( CLK     ),
+	.rst          ( 1'b0    ),
+	.outclk_0     ( CLKG    ),
+	.locked       ( LocKed  )
+);
+
+ddc_top inst_ddc_top1(
+	.CLK           ( CLKG       ),
+	.RST           ( RST        ),
+	.DDCRST        ( 1'b0       ),
+	//-----------------------------
+	.ADCDATA       ( ADCDATA    ),
+	.ADCDATB       ( ADCDATB    ),
+	//-----------------------------
+	.DDC1_DOE      ( DdcDOe1    ),
+	.DDC1_DATI     ( DdcDatI1   ),
+	.DDC1_DATQ     ( DdcDatQ1   ),
+	.DDC2_DOE      ( DdcDOe2    ),
+	.DDC2_DATI     ( DdcDatI2   ),
+	.DDC2_DATQ     ( DdcDatQ2   )
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+endmodule

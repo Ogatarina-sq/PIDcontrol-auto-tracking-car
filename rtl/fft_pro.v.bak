@@ -1,0 +1,112 @@
+module fft_pro(
+	input              CLK,
+	input              RST,
+	//--------------------------------
+	output             FFTBUSY,
+	input              FFTDOE,
+	input      [15: 0] FFTDATI,
+	input      [15: 0] FFTDATQ,
+	//--------------------------------
+);
+
+reg  [9 : 0] WinAdd;
+wire [15: 0] WinDat;
+
+reg          SyFtDOe;
+reg  [15: 0] SyFtDatI;
+reg  [15: 0] SyFtDatQ;
+
+reg          WindMultDoe;
+wire [31: 0] WindMultDI;
+wire [31: 0] WindMultDQ;
+
+reg          WindDoe;
+reg  [15: 0] WindDatI;
+reg  [15: 0] WindDatQ;
+
+
+//--Add wind---------------------------------------------------------
+ram_wind inst_ram_wind(
+	.clock            ( CLK    ),
+	.address          ( WinAdd ),
+	.q                ( WinDat )
+);
+
+always@(posedge CLK,posedge RST)begin
+	if(RST)begin
+		SyFtDOe     <= 1'b0;
+		SyFtDatI    <= 16'd0;
+		SyFtDatQ    <= 16'd0;
+		WinAdd      <= 10'd0;
+	end else if(FFTDOE)begin
+		SyFtDOe     <= 1'b1;
+		SyFtDatI    <= FFTDATI;
+		SyFtDatQ    <= FFTDATQ;
+		WinAdd      <= WinAdd + 10'd1;
+	end else begin
+		SyFtDOe     <= 1'b0;
+	end
+end
+
+wind_mult inst_wind_multi(
+	.clock          ( CLK        ),
+	.aclr           ( RST        ),
+	//----------------------------
+	.dataa          ( SyFtDatI   ),
+	.datab          ( WinDat     ),
+	.result         ( WindMultDI )
+);
+
+wind_mult inst_wind_multq(
+	.clock          ( CLK        ),
+	.aclr           ( RST        ),
+	//----------------------------
+	.dataa          ( SyFtDatQ   ),
+	.datab          ( WinDat     ),
+	.result         ( WindMultDQ )
+);
+
+always@(posedge CLK,posedge RST)begin
+	if(RST)begin
+		WindMultDoe   <= 1'b0;
+		WindDoe       <= 1'b0;
+		WindDatI      <= 16'd0;
+		WindDatQ      <= 16'd0;
+	end else begin
+		WindMultDoe   <= SyFtDOe;
+		WindDoe       <= WindMultDoe;
+		WindDatI      <= WindMultDI[31:16] + WindMultDI[15];
+		WindDatQ      <= WindMultDQ[31:16] + WindMultDQ[15];
+	end
+end
+
+//--Add wind end------------------------------------------------------
+
+
+
+
+fft_core inst_fft_core(
+	.clk              ( CLK        ),
+	.reset_n          ( !RST       ),
+	//--------------------------------------
+	.sink_valid       ( ),
+	.sink_ready       ( ),
+	.sink_error       ( 2'b00      )
+	.sink_sop         ( ),
+	.sink_eop         ( ),
+	.sink_real        ( ),
+	.sink_imag        ( ),
+	.fftpts_in        ( 10'd10     ),
+	.inverse          ( 1'b0       ),
+	//--------------------------------------
+	.source_valid     ( ),
+	.source_ready     ( 1'b1       ),
+	.source_sop       ( ),
+	.source_eop       ( ),
+	.source_real      ( ),
+	.source_imag      ( )
+);
+
+
+
+endmodule
